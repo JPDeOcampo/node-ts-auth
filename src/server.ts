@@ -17,8 +17,9 @@ app.use(
   }),
 );
 
-app.use(express.json());
 app.use(cookieParser());
+app.use(express.json());
+
 
 // Verify JWT token
 // app.get("/api/verify-token", authenticateJWT, (req: Request & { user?: any }, res: Response) => {

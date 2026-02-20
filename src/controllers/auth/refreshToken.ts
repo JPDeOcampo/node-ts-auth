@@ -1,4 +1,5 @@
 import type { Request, Response } from "express";
+import type { JwtPayload } from "jsonwebtoken";
 import User from "@/models/User.js";
 import jwt from "jsonwebtoken";
 
@@ -8,9 +9,9 @@ export const refreshToken = async (req: Request, res: Response) => {
   if (!token) return res.status(401).json({ message: "No refresh token" });
 
   try {
-    const decoded: any = jwt.verify(token, process.env.JWT_REFRESH_SECRET!);
+    const decoded = jwt.verify(token, process.env.JWT_REFRESH_SECRET!) as JwtPayload;
     
-    // Find user and verify the token matches what we have in DB
+    // Find user and verify the token matches
     const user = await User.findById(decoded.id);
     if (!user || user.refreshToken !== token) {
       return res.status(403).json({ message: "Invalid refresh token" });

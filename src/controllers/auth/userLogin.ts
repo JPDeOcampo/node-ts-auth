@@ -3,8 +3,9 @@ import User from "@/models/User.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { serialize } from "cookie";
+import { generateAuthToken } from "@/utils/generateAuthToken.js";
 
-export const loginUser = async (req: Request, res: Response) => {
+export const userLogin = async (req: Request, res: Response) => {
   try {
     const { email, password } = req.body;
     const pepper = process.env.PEPPER;
@@ -18,18 +19,16 @@ export const loginUser = async (req: Request, res: Response) => {
     if (!isValid) return res.status(401).json({ message: "Invalid credentials" });
 
     // Create Access Token (Short-lived)
-    const accessToken = jwt.sign(
-      { id: user._id }, 
-      process.env.JWT_ACCESS_SECRET!, 
-      { expiresIn: "15m" }
-    );
+    const accessToken = await generateAuthToken({
+      id: user._id,
+      expiresIn: "15m",
+    });
 
     // Create Refresh Token (Long-lived)
-    const refreshToken = jwt.sign(
-      { id: user._id }, 
-      process.env.JWT_REFRESH_SECRET!, 
-      { expiresIn: "7d" }
-    );
+    const refreshToken = await generateAuthToken({
+      id: user._id,
+      expiresIn: "7d",
+    });
 
     // Store Refresh Token in DB to allow remote logout
     user.refreshToken = refreshToken; 
@@ -41,7 +40,7 @@ export const loginUser = async (req: Request, res: Response) => {
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
       maxAge: 7 * 24 * 60 * 60, // 7 days
-      path: "/api/user/refreshToken",
+      path: "/api/user/refresh-token",
     }));
 
     return res.status(200).json({ accessToken, userId: user._id });
