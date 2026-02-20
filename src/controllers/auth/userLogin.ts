@@ -47,6 +47,6 @@ export const userLogin = async (req: Request, res: Response) => {
 
   } catch (error) {
     console.error("Login error:", error);
-    return res.status(500).json({ message: "Server error" });
+    return res.status(500).json({ message: "An unexpected error occurred." });
   }
 };

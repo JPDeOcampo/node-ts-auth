@@ -34,10 +34,10 @@ export const resetPassword = async (req: Request, res: Response) => {
     await user.save();
 
     return res.status(200).json({ message: "Password reset successfully" });
-  } catch (error: any) {
+  } catch (error) {
     console.error("Reset password error:", error);
     return res
       .status(500)
-      .json({ message: error.message || "Internal Server Error" });
+      .json({ message: error || "An unexpected error occurred." });
   }
 };

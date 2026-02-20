@@ -4,20 +4,16 @@ import { sendResetPassword } from "@/utils/mailer/sendResetPassword.js";
 import { generate5DigitCode } from "@/utils/globalUtils.js";
 import bcrypt from "bcrypt";
 
-export const forgotPassword = async (
-  req: Request,
-  res: Response,
-): Promise<void> => {
+export const forgotPassword = async (req: Request, res: Response) => {
   try {
     const { email } = req.body;
 
     // Check if the user exists and is not a social account
     const existingUser = await User.findOne({ email });
     if (!existingUser || existingUser.socialAccount) {
-      res.status(404).json({
+      return res.status(404).json({
         message: "Email not found",
       });
-      return;
     }
 
     // Generate a 5 digit random code and set expiration time (2 minutes)
@@ -35,16 +31,15 @@ export const forgotPassword = async (
       resetCode: verificationCode,
     });
     if (!emailSent) {
-      res.status(500).json({ message: "Failed to send reset email" });
-      return;
+      return res.status(500).json({ message: "Failed to send reset email" });
     }
 
-    res.status(200).json({
+    return res.status(200).json({
       message: "Reset code is sent to your email",
     });
-  } catch (error: unknown) {
-    res.status(500).json({
-      message: error instanceof Error ? error.message : "Server error",
+  } catch (error) {
+    return res.status(500).json({
+      message: error || "An unexpected error occurred.",
     });
   }
 };

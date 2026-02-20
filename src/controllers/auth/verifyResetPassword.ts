@@ -66,10 +66,10 @@ export const verifyResetPassword = async (
     return res.status(200).json({
       message: "Verification code is valid",
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error("Error verifying reset password code:", error);
     return res
       .status(500)
-      .json({ message: error.message || "Internal Server Error" });
+      .json({ message: error || "Internal Server Error" });
   }
 };

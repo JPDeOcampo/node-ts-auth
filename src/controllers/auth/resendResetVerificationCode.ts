@@ -40,8 +40,8 @@ export const resendResetVerificationCode = async (
     }
 
     return res.status(200).json({ message: "Reset code is sent to your email" });
-  } catch (error: any) {
+  } catch (error) {
     console.error("Forgot password error:", error);
-    return res.status(500).json({ message: error.message || "Server error" });
+    return res.status(500).json({ message: error || "An unexpected error occurred." });
   }
 };

@@ -24,8 +24,9 @@ export const refreshToken = async (req: Request, res: Response) => {
       { expiresIn: "15m" }
     );
 
-    res.json({ accessToken: newAccessToken });
-  } catch (e) {
-    res.status(403).json({ message: "Expired refresh token" });
+    return res.json({ accessToken: newAccessToken });
+  } catch (error) {
+    console.error("Refresh token error:", error);
+    return res.status(403).json({ message: "An unexpected error occurred." });
   }
 };

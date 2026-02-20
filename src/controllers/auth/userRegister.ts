@@ -63,7 +63,7 @@ export const userRegister = async (req: Request, res: Response) => {
     return res.status(201).json({
       message: "User registered successfully! You can now log in.",
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error("Registration Error:", error);
     return res.status(500).json({ message: "An unexpected error occurred." });
   }

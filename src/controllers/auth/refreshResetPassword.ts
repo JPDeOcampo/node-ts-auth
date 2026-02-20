@@ -31,8 +31,8 @@ export const refreshResetPassword = async (req: Request, res: Response) => {
     return res.status(200).json({
       message: "Reset token is valid",
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error("Error verifying reset token:", error);
-    return res.status(500).json({ message: error.message || "Internal Server Error" });
+    return res.status(500).json({ message: error || "An unexpected error occurred." });
   }
 };

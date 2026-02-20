@@ -2,7 +2,9 @@ import express, { type Router }  from 'express';
 import { authLimiter } from '@/middleware/rateLimiters.js';
 import { protect } from '@/middleware/authenticate.js';
 import { validate } from '@/middleware/validate.js';
-import { updatePasswordSchema } from "@/validators/userValidator.js";
+import { emailSchema, updatePasswordSchema } from "@/validators/userValidator.js";
+
+
 import { userRegister } from '@/controllers/auth/userRegister.js';
 import { userLogin } from '@/controllers/auth/userLogin.js';
 import { refreshToken } from '@/controllers/auth/refreshToken.js';
@@ -13,15 +15,15 @@ import { resetPassword } from '@/controllers/auth/resetPassword.js';
 
 const router: Router = express.Router();
 
-router.post('/user/register', authLimiter, userRegister);
-router.post('/user/login', authLimiter, userLogin);
-router.post('/user/refresh-token', authLimiter, refreshToken);
-router.put('/user/update-password/:id', authLimiter, protect, validate(updatePasswordSchema), userUpdatePassword);
+router.post('/v1/user/register', authLimiter, userRegister);
+router.post('/v1/user/login', authLimiter, userLogin);
+router.post('/v1/user/refresh-token', authLimiter, refreshToken);
+router.put('/v1/user/update-password/:id', authLimiter, protect, validate(updatePasswordSchema), userUpdatePassword);
 
 // Password reset flow
-router.post("/user/forgot-password", forgotPassword);
-router.post("/user/reset/verify-reset-password", verifyResetPassword);
-router.post("/user/reset/reset-password", resetPassword)
+router.post("/v1/user/forgot-password", authLimiter, validate(emailSchema), forgotPassword);
+router.post("/v1/user/reset/verify-reset-password", verifyResetPassword);
+router.post("/v1/user/reset/reset-password", resetPassword)
 
 export default router;
 
