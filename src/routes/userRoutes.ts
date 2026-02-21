@@ -2,7 +2,7 @@ import express, { type Router }  from 'express';
 import { authLimiter } from '@/middleware/rateLimiters.js';
 import { protect } from '@/middleware/authenticate.js';
 import { validate } from '@/middleware/validate.js';
-import { emailSchema, updatePasswordSchema } from "@/validators/userValidator.js";
+import { registerSchema, emailSchema, updatePasswordSchema } from "@/validators/userValidator.js";
 
 
 import { userRegister } from '@/controllers/auth/userRegister.js';
@@ -15,7 +15,7 @@ import { resetPassword } from '@/controllers/auth/resetPassword.js';
 
 const router: Router = express.Router();
 
-router.post('/v1/user/register', authLimiter, userRegister);
+router.post('/v1/user/register', authLimiter, validate(registerSchema), userRegister);
 router.post('/v1/user/login', authLimiter, userLogin);
 router.post('/v1/user/refresh-token', authLimiter, refreshToken);
 router.put('/v1/user/update-password/:id', authLimiter, protect, validate(updatePasswordSchema), userUpdatePassword);

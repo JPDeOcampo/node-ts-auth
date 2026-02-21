@@ -1,35 +1,10 @@
 import type { Request, Response } from "express";
 import User from "@/models/User.js";
-import bcrypt from "bcrypt";
-import { z } from "zod";
-
-// Validation Schema
-const RegisterSchema = z
-  .object({
-    firstName: z.string().min(2, "First name is too short"),
-    lastName: z.string().min(2, "Last name is too short"),
-    email: z.email("Invalid email format"),
-    password: z.string().min(8, "Password must be at least 8 characters"),
-    reEnterPassword: z.string(),
-  })
-  .refine((data) => data.password === data.reEnterPassword, {
-    message: "Passwords do not match",
-    path: ["reEnterPassword"],
-  });
+import { hashPassword } from "@/utils/authUtils.js";
 
 export const userRegister = async (req: Request, res: Response) => {
   try {
-    // Validate input
-    const validation = RegisterSchema.safeParse(req.body);
-
-    if (!validation.success) {
-      return res.status(400).json({
-        message: "Validation failed",
-        errors: z.treeifyError(validation.error),
-      });
-    }
-
-    const { firstName, lastName, email, password } = validation.data;
+    const { firstName, lastName, email, password } = req.body;
 
     // Normalize email (prevents "User@me.com" and "user@me.com" being two accounts)
     const normalizedEmail = email.toLowerCase().trim();
@@ -39,23 +14,17 @@ export const userRegister = async (req: Request, res: Response) => {
 
     if (existingUser) {
       return res.status(400).json({
-        message: "This email is already registered.",
+        message: "The email is already registered. Please log in or use a different email.",
         field: "email",
       });
     }
-
-    // Hash Password
-    const pepper = process.env.PEPPER;
-    const saltRounds = 12;
-    const passwordWithPepper = password + pepper;
-    const hashedPassword = await bcrypt.hash(passwordWithPepper, saltRounds);
 
     // Save User
     const newUser = new User({
       firstName,
       lastName,
       email: normalizedEmail,
-      password: hashedPassword,
+      password: await hashPassword(password),
     });
 
     await newUser.save();
