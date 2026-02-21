@@ -1,6 +1,6 @@
 import crypto from "crypto";
 
-export const generate5DigitCode = (): string => {
-  const num = crypto.randomInt(10000, 100000); // 10000 ≤ num < 100000
+export const generate6DigitCode = (): string => {
+  const num = crypto.randomInt(100000, 1000000); // 100000 ≤ num < 1000000
   return num.toString();
 };

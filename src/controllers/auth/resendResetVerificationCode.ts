@@ -1,7 +1,7 @@
 import type { Request, Response } from "express";
 import User from "@/models/User.js";
 import { sendResetPassword } from "@/utils/mailer/sendResetPassword.js";
-import { generate5DigitCode } from "@/utils/globalUtils.js";
+import { generate6DigitCode } from "@/utils/globalUtils.js";
 
 export const resendResetVerificationCode = async (
   req: Request,
@@ -21,7 +21,7 @@ export const resendResetVerificationCode = async (
     }
 
     // Generate a 4-byte random hex reset token
-    const resetVerificationCode = generate5DigitCode();
+    const resetVerificationCode = generate6DigitCode();
     const resetVerificationCodeExpires = new Date(Date.now() + 2 * 60 * 1000);
 
     // Save verification code and expiration to the user document

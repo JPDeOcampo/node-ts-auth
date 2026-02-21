@@ -1,7 +1,6 @@
 import type { Request, Response } from "express";
 import User from "@/models/User.js";
 import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
 import { generateAuthToken } from "@/utils/generateAuthToken.js";
 
 export const verifyResetPassword = async (
@@ -41,11 +40,6 @@ export const verifyResetPassword = async (
     if (user.verificationCodeExpires < now) {
       return res.status(400).json({ message: "Verification code has expired" });
     }
-
-    // Clear verification code fields
-    user.set("verificationCode", undefined);
-    user.set("verificationCodeExpires", undefined);
-    await user.save();
 
     // Generate short-lived reset token (10 minutes)
     const resetToken = await generateAuthToken({

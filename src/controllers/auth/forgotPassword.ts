@@ -1,7 +1,7 @@
 import type { Request, Response } from "express";
 import User from "@/models/User.js";
 import { sendResetPassword } from "@/utils/mailer/sendResetPassword.js";
-import { generate5DigitCode } from "@/utils/globalUtils.js";
+import { generate6DigitCode } from "@/utils/globalUtils.js";
 import bcrypt from "bcrypt";
 
 export const forgotPassword = async (req: Request, res: Response) => {
@@ -17,7 +17,7 @@ export const forgotPassword = async (req: Request, res: Response) => {
     }
 
     // Generate a 5 digit random code and set expiration time (2 minutes)
-    const verificationCode = generate5DigitCode();
+    const verificationCode = generate6DigitCode();
     const verificationCodeExpires = new Date(Date.now() + 2 * 60 * 1000); // 2 minutes
 
     // Save verification code and expiration to the user document

@@ -4,7 +4,7 @@ import { hashPassword } from "@/utils/authUtils.js";
 
 export const resetPassword = async (req: Request, res: Response) => {
   try {
-    const emailParam = req.params.email;
+    const emailParam = req.query.email;
 
     if (typeof emailParam !== "string") {
       return res.status(400).send("Invalid email parameter");
@@ -16,7 +16,7 @@ export const resetPassword = async (req: Request, res: Response) => {
 
     // Find the user by email
     const user = await User.findOne({ email });
-
+console.log("User found for password reset:", user);
     if (
       !user ||
       !user.verificationCode ||

@@ -1,9 +1,9 @@
-import express, { type Express, type Request, type Response } from "express";
+import express, { type Express } from "express";
 import cors from "cors";
 import connectDB from "../src/config/db.js";
 import usersRoutes from "./routes/userRoutes.js";
-import cookieParser from 'cookie-parser';
-// import authenticateJWT from "@/middleware/authenticateJWT.js";
+import cookieParser from "cookie-parser";
+import { errorHandler } from "./middleware/errorHandler.js";
 
 connectDB();
 
@@ -20,23 +20,11 @@ app.use(
 app.use(cookieParser());
 app.use(express.json());
 
-
-// Verify JWT token
-// app.get("/api/verify-token", authenticateJWT, (req: Request & { user?: any }, res: Response) => {
-//   if (req.user) {
-//     return res
-//       .status(200)
-//       .json({ message: "JWT token is valid.", validToken: true });
-//   } else {
-//     return res
-//       .status(401)
-//       .json({ message: "JWT token is invalid or missing." });
-//   }
-// });
-
 // Routes
 app.use("/api", usersRoutes);
 
+// Global error handler
+app.use(errorHandler);
 
 if (process.env.NODE_ENV !== "production") {
   const PORT = process.env.PORT || 5000;

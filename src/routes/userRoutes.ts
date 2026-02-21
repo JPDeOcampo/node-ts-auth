@@ -1,29 +1,60 @@
-import express, { type Router }  from 'express';
-import { authLimiter } from '@/middleware/rateLimiters.js';
-import { protect } from '@/middleware/authenticate.js';
-import { validate } from '@/middleware/validate.js';
-import { registerSchema, emailSchema, updatePasswordSchema } from "@/validators/userValidator.js";
+import express, { type Router } from "express";
+import { authLimiter } from "@/middleware/rateLimiters.js";
+import { protect } from "@/middleware/authenticate.js";
+import { validate } from "@/middleware/validate.js";
+import {
+  registerSchema,
+  emailSchema,
+  updatePasswordSchema,
+} from "@/validators/userValidator.js";
+import { asyncHandler } from "@/utils/asyncHandler.js";
 
+// -- Auth Controllers --
+import { userRegister, userLogin } from "@/controllers/auth/authController.js";
 
-import { userRegister } from '@/controllers/auth/userRegister.js';
-import { userLogin } from '@/controllers/auth/userLogin.js';
-import { refreshToken } from '@/controllers/auth/refreshToken.js';
-import { userUpdatePassword } from '@/controllers/auth/userUpdatePassword.js';
-import { forgotPassword } from '@/controllers/auth/forgotPassword.js';
-import { verifyResetPassword } from '@/controllers/auth/verifyResetPassword.js';
-import { resetPassword } from '@/controllers/auth/resetPassword.js';
+// -- Password Controllers --
+import {
+  updatePassword,
+  forgotPassword,
+  verifyResetPWVerificationCode,
+  resetPassword,
+} from "@/controllers/auth/passwordController.js";
+
+import { refreshToken } from "@/controllers/auth/tokenController.js";
 
 const router: Router = express.Router();
 
-router.post('/v1/user/register', authLimiter, validate(registerSchema), userRegister);
-router.post('/v1/user/login', authLimiter, userLogin);
-router.post('/v1/user/refresh-token', authLimiter, refreshToken);
-router.put('/v1/user/update-password/:id', authLimiter, protect, validate(updatePasswordSchema), userUpdatePassword);
+// -- Auth Routes --
+router.post(
+  "/v1/user/register",
+  authLimiter,
+  validate(registerSchema),
+  asyncHandler(userRegister),
+);
+router.post("/v1/user/login", authLimiter, asyncHandler(userLogin));
+
+router.post("/v1/user/refresh-token", authLimiter, asyncHandler(refreshToken));
+
+// -- Password Routes --
+router.put(
+  "/v1/user/update-password/:id",
+  authLimiter,
+  protect,
+  validate(updatePasswordSchema),
+  asyncHandler(updatePassword),
+);
 
 // Password reset flow
-router.post("/v1/user/forgot-password", authLimiter, validate(emailSchema), forgotPassword);
-router.post("/v1/user/reset/verify-reset-password", verifyResetPassword);
-router.post("/v1/user/reset/reset-password", resetPassword)
+router.post(
+  "/v1/user/forgot-password",
+  authLimiter,
+  validate(emailSchema),
+  asyncHandler(forgotPassword),
+);
+router.post(
+  "/v1/user/reset/verify-reset-password",
+  verifyResetPWVerificationCode,
+);
+router.post("/v1/user/reset/reset-password", resetPassword);
 
 export default router;
-
