@@ -1,6 +1,6 @@
 import User from "@/models/User.js";
 import { hashPassword, verifyPassword } from "@/utils/authUtils.js";
-import { generateAuthToken } from "@/utils/generateAuthToken.js";
+import { generateSignToken } from "@/utils/generateSignToken.js";
 import { AppError } from "@/utils/errors/appError.js";
 import type { RegisterUserDTO, LoginUserDTO } from "@/@types/auth.types.js";
 import crypto from "crypto";
@@ -53,11 +53,11 @@ export const loginUser = async (credentials: LoginUserDTO) => {
   }
 
   // Generate Tokens
-  const accessToken = await generateAuthToken({
+  const accessToken = await generateSignToken({
     id: user._id,
     expiresIn: "15m",
   });
-  const refreshToken = await generateAuthToken({
+  const refreshToken = await generateSignToken({
     id: user._id,
     expiresIn: "7d",
   });

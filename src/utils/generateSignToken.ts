@@ -1,7 +1,7 @@
 import { Types } from "mongoose";
 import jwt, { type SignOptions } from "jsonwebtoken";
 
-export const generateAuthToken = async ({
+export const generateSignToken = async ({
   id,
   purpose = "auth",
   expiresIn = "15m",

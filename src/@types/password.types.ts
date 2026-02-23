@@ -8,3 +8,10 @@ export interface VerifyResetPWVerificationCodeDTO {
   email: string;
   verificationCode: string;
 }
+
+export interface RefreshResetPasswordCodeDTO {
+  id: string;
+  purpose: "password-reset";
+  iat?: number;
+  exp?: number;
+}

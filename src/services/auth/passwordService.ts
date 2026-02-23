@@ -5,11 +5,13 @@ import { AppError } from "@/utils/errors/appError.js";
 import type {
   UpdatePasswordDTO,
   VerifyResetPWVerificationCodeDTO,
+  RefreshResetPasswordCodeDTO,
 } from "@/@types/password.types.js";
 import { sendResetPassword } from "@/utils/mailer/sendResetPassword.js";
 import { generate6DigitCode } from "@/utils/globalUtils.js";
 import bcrypt from "bcrypt";
-import { generateAuthToken } from "@/utils/generateAuthToken.js";
+import { generateSignToken } from "@/utils/generateSignToken.js";
+import jwt from "jsonwebtoken";
 
 // --- Update Password Logic ---
 export const updatePassword = async (data: UpdatePasswordDTO) => {
@@ -111,7 +113,7 @@ export const verifyResetPWVerificationCode = async (
   }
 
   // Generate short-lived reset token (2 minutes)
-  const resetToken = await generateAuthToken({
+  const resetToken = await generateSignToken({
     id: user._id,
     purpose: "password-reset",
     expiresIn: "2m",
@@ -120,6 +122,7 @@ export const verifyResetPWVerificationCode = async (
   return resetToken;
 };
 
+// --- Reset Password Logic ---
 export const resetPassword = async (data: any) => {
   if (typeof data.email !== "string") {
     throw new AppError("Invalid email parameter", 400);
@@ -148,4 +151,56 @@ export const resetPassword = async (data: any) => {
   user.set("verificationCodeExpires", undefined);
 
   return await user.save();
+};
+
+// --- Refresh Reset Password Logic ---
+export const refreshResetPassword = async (refreshToken: string) => {
+  if (!refreshToken) {
+    throw new AppError("Reset token is missing or expired", 400);
+  }
+
+  let payload: RefreshResetPasswordCodeDTO;
+
+  try {
+    payload = jwt.verify(
+      refreshToken,
+      process.env.JWT_ACCESS_SECRET!,
+    ) as RefreshResetPasswordCodeDTO;
+
+    if (payload.purpose !== "password-reset") {
+      throw new AppError("Invalid reset token", 400);
+    }
+  } catch (error) {
+    throw new AppError("Reset token is invalid or expired", 400);
+  }
+
+  return payload;
+};
+
+// --- Resend Reset Verification Code Logic ---
+export const resendResetVerificationCode = async (id: string | undefined | string[]) => {
+  const existingUser = await User.findById(id);
+
+  if (!existingUser) {
+    throw new AppError("User not found", 404);
+  }
+
+  // Generate a 6 random code and set expiration time (2 minutes) for reset token
+  const resetVerificationCode = generate6DigitCode();
+  const resetVerificationCodeExpires = new Date(Date.now() + 2 * 60 * 1000);
+
+  // Save verification code and expiration to the user document
+  existingUser.verificationCode = resetVerificationCode;
+  existingUser.verificationCodeExpires = resetVerificationCodeExpires;
+  await existingUser.save();
+
+  // Send the reset email
+  const emailSent = await sendResetPassword({
+    email: existingUser.email,
+    resetCode: resetVerificationCode,
+  });
+
+  if (!emailSent) {
+    throw new AppError("Failed to send reset email", 500);
+  }
 };

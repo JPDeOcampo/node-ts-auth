@@ -1,6 +1,6 @@
 import type { Request, Response } from "express";
 import { serialize } from "cookie";
-import * as tokenService from "@/services/auth/tokenServices.js";
+import * as tokenService from "@/services/auth/tokenService.js";
 
 export const refreshToken = async (req: Request, res: Response) => {
   const { newAccessToken, newRefreshToken } = await tokenService.refreshToken(

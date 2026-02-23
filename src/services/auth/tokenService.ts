@@ -2,7 +2,7 @@ import type { JwtPayload } from "jsonwebtoken";
 import User from "@/models/User.js";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
-import { generateAuthToken } from "@/utils/generateAuthToken.js";
+import { generateSignToken } from "@/utils/generateSignToken.js";
 import { AppError } from "@/utils/errors/appError.js";
 
 export const refreshToken = async (token: string) => {
@@ -36,11 +36,11 @@ export const refreshToken = async (token: string) => {
     (t) => t.token !== hashedIncomingToken && t.expiresAt > new Date(),
   );
 
-  const newAccessToken = await generateAuthToken({
+  const newAccessToken = await generateSignToken({
     id: user._id,
     expiresIn: "15m",
   });
-  const newRefreshToken = await generateAuthToken({
+  const newRefreshToken = await generateSignToken({
     id: user._id,
     expiresIn: "7d",
   });

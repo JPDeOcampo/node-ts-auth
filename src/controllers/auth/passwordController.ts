@@ -50,3 +50,22 @@ export const resetPassword = async (req: Request, res: Response) => {
   await passwordService.resetPassword({ emailParam, newPassword });
   return res.status(200).json({ message: "Password reset successfully" });
 };
+
+// --- Refresh Reset Password Code ---
+export const refreshResetPassword = async (req: Request, res: Response) => {
+  await passwordService.refreshResetPassword(req.cookies.resetToken);
+
+  return res.status(200).json({
+    message: "Reset token is valid",
+  });
+};
+
+// --- Resend Reset Verification Code ---
+export const resendResetVerificationCode = async (
+  req: Request,
+  res: Response,
+) => {
+  await passwordService.resendResetVerificationCode(req.params.id);
+
+  return res.status(200).json({ message: "Reset code is sent to your email" });
+};
