@@ -45,8 +45,8 @@ export const verifyResetPWVerificationCode = async (
 
 // --- Reset Password ---
 export const resetPassword = async (req: Request, res: Response) => {
-  const emailParam = req.query.email;
-  const { newPassword } = req.body.newPassword;
+  const emailParam = req.query.email as string | undefined;
+  const { newPassword } = req.body;
   await passwordService.resetPassword({ emailParam, newPassword });
   return res.status(200).json({ message: "Password reset successfully" });
 };
@@ -65,7 +65,7 @@ export const resendResetVerificationCode = async (
   req: Request,
   res: Response,
 ) => {
-  await passwordService.resendResetVerificationCode(req.params.id);
+  await passwordService.resendResetVerificationCode(req.query.email as string);
 
   return res.status(200).json({ message: "Reset code is sent to your email" });
 };

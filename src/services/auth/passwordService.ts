@@ -5,6 +5,7 @@ import { AppError } from "@/utils/errors/appError.js";
 import type {
   UpdatePasswordDTO,
   VerifyResetPWVerificationCodeDTO,
+  ResetPasswordDTO,
   RefreshResetPasswordCodeDTO,
 } from "@/@types/password.types.js";
 import { sendResetPassword } from "@/utils/mailer/sendResetPassword.js";
@@ -123,14 +124,13 @@ export const verifyResetPWVerificationCode = async (
 };
 
 // --- Reset Password Logic ---
-export const resetPassword = async (data: any) => {
-  if (typeof data.email !== "string") {
+export const resetPassword = async (data: ResetPasswordDTO) => {
+  const { emailParam, newPassword } = data;
+  if (typeof emailParam !== "string") {
     throw new AppError("Invalid email parameter", 400);
   }
 
-  const email = data.email.toLowerCase();
-
-  const newPassword = data.newPassword;
+  const email = emailParam.toLowerCase();
 
   // Find the user by email
   const user = await User.findOne({ email });
@@ -178,8 +178,8 @@ export const refreshResetPassword = async (refreshToken: string) => {
 };
 
 // --- Resend Reset Verification Code Logic ---
-export const resendResetVerificationCode = async (id: string | undefined | string[]) => {
-  const existingUser = await User.findById(id);
+export const resendResetVerificationCode = async (email: string) => {
+  const existingUser = await User.findOne({ email });
 
   if (!existingUser) {
     throw new AppError("User not found", 404);
@@ -192,7 +192,6 @@ export const resendResetVerificationCode = async (id: string | undefined | strin
   // Save verification code and expiration to the user document
   existingUser.verificationCode = resetVerificationCode;
   existingUser.verificationCodeExpires = resetVerificationCodeExpires;
-  await existingUser.save();
 
   // Send the reset email
   const emailSent = await sendResetPassword({
@@ -203,4 +202,6 @@ export const resendResetVerificationCode = async (id: string | undefined | strin
   if (!emailSent) {
     throw new AppError("Failed to send reset email", 500);
   }
+
+  return await existingUser.save();
 };

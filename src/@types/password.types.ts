@@ -15,3 +15,8 @@ export interface RefreshResetPasswordCodeDTO {
   iat?: number;
   exp?: number;
 }
+
+export interface ResetPasswordDTO {
+  emailParam: string | undefined;
+  newPassword: string;
+}
